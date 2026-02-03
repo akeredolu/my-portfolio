@@ -13,10 +13,11 @@ export async function POST(req) {
       );
     }
 
+    // Create the SMTP transporter
     const transporter = nodemailer.createTransport({
-      host: process.env.BREVO_SMTP_HOST,
-      port: Number(process.env.BREVO_SMTP_PORT),
-      secure: false,
+      host: process.env.BREVO_SMTP_HOST || "smtp-relay.brevo.com",
+      port: Number(process.env.BREVO_SMTP_PORT) || 465,
+      secure: process.env.BREVO_SMTP_SECURE === "false" ? false : true,
       auth: {
         user: process.env.BREVO_SMTP_USER,
         pass: process.env.BREVO_SMTP_PASS,
@@ -28,7 +29,7 @@ export async function POST(req) {
       to: process.env.BREVO_RECEIVER,
       replyTo: email,
       subject: `New message from ${name}`,
-      text: message,
+      text: `Name: ${name}\nEmail: ${email}\n\n${message}`,
     });
 
     return Response.json({
