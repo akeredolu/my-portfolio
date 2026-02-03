@@ -372,7 +372,6 @@ export default function HomePage() {
       message: e.target.message.value,
     };
 
-    // Safer fetch with nested try/catch
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
@@ -382,54 +381,29 @@ export default function HomePage() {
 
       let result;
       try {
-        result = await res.json(); // parse JSON safely
+        result = await res.json();
       } catch {
         result = { success: false, message: "Server returned invalid JSON" };
       }
 
       if (result.success) {
-        alert("Message sent successfully!");
+        alert(result.message);
         e.target.reset();
       } else {
         alert(result.message || "Failed to send message. Try again later.");
       }
     } catch (err) {
-      alert("Error sending message. Check console.");
       console.error(err);
+      alert("Error sending message. Check console.");
     }
   }}
   className="w-full max-w-lg bg-white dark:bg-gray-800 p-10 rounded-2xl shadow-lg space-y-6"
 >
   <h3 className="text-2xl font-semibold text-center">Get in Touch</h3>
-
-  <input
-    name="name"
-    type="text"
-    placeholder="Your Name"
-    required
-    className="w-full border rounded-xl p-3"
-  />
-
-  <input
-    name="email"
-    type="email"
-    placeholder="Your Email"
-    required
-    className="w-full border rounded-xl p-3"
-  />
-
-  <textarea
-    name="message"
-    placeholder="Your Message"
-    rows={6}
-    required
-    className="w-full border rounded-xl p-3 resize-none"
-  />
-
-  <button
-    type="submit"
-    className="w-full bg-indigo-600 text-white rounded-xl px-6 py-3 font-semibold hover:bg-indigo-700 transition"
-  >
+  <input name="name" type="text" placeholder="Your Name" required className="w-full border rounded-xl p-3" />
+  <input name="email" type="email" placeholder="Your Email" required className="w-full border rounded-xl p-3" />
+  <textarea name="message" placeholder="Your Message" rows={6} required className="w-full border rounded-xl p-3 resize-none" />
+  <button type="submit" className="w-full bg-indigo-600 text-white rounded-xl px-6 py-3 font-semibold hover:bg-indigo-700 transition">
     Send Message
   </button>
 </form>
