@@ -1,5 +1,3 @@
-import nodemailer from "nodemailer";
-
 export const runtime = "nodejs";
 
 export async function POST(req) {
@@ -13,31 +11,23 @@ export async function POST(req) {
       );
     }
 
-    // Use serverless-friendly SMTP settings
-    const transporter = nodemailer.createTransport({
-      host: "smtp-relay.brevo.com",
-      port: 587,          // Use 587 for serverless
-      secure: false,      // never true on serverless
-      auth: {
-        user: process.env.BREVO_SMTP_USER,
-        pass: process.env.BREVO_SMTP_PASS,
+    // Call Brevo HTTP API
+    const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "api-key": process.env.BREVO_API_KEY,
       },
-      tls: {
-        rejectUnauthorized: false, // avoid cert issues
-      },
-      // optional quick connection
-      connectionTimeout: 5000, // 5 seconds max
-      greetingTimeout: 5000,
-      socketTimeout: 5000,
+      body: JSON.stringify({
+        sender: { email: process.env.BREVO_SENDER },
+        to: [{ email: process.env.BREVO_RECEIVER }],
+        subject: `New message from ${name}`,
+        textContent: `Name: ${name}\nEmail: ${email}\n\n${message}`,
+        replyTo: { email },
+      }),
     });
 
-    await transporter.sendMail({
-      from: `"Portfolio Contact" <${process.env.BREVO_SENDER}>`,
-      to: process.env.BREVO_RECEIVER,
-      replyTo: email,
-      subject: `New message from ${name}`,
-      text: `Name: ${name}\nEmail: ${email}\n\n${message}`,
-    });
+    if (!res.ok) throw new Error("Email API failed");
 
     return new Response(
       JSON.stringify({ success: true, message: "Message sent successfully!" }),
